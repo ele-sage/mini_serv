@@ -34,9 +34,12 @@ t_client clients[MAX_FD];
 
 void free_clients()
 {
-    for (int i = 0; i < MAX_FD; i++)
-        if (clients[i].queue)
-            free(clients[i].queue);
+    for (int fd = 3; fd < MAX_FD; fd++)
+    {
+        if (clients[fd].queue)
+            free(clients[fd].queue);
+        close(fd);
+    }
 }
 
 void std_err(char *str)
@@ -152,11 +155,11 @@ int main(int argc, char **argv)
 
     if (argc != 2)
         std_err(WRONG_NUM);
-    sock = socket(AF_INET, SOCK_STREAM, 0);
+
+    maxfd = sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1)
         std_err(FATAL);
 
-    maxfd = sock;
     bzero(&addr, sizeof(addr));
     bzero(clients, sizeof(t_client) * MAX_CLIENT);
     FD_ZERO(&current);
